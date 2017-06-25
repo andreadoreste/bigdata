@@ -1,3 +1,6 @@
+
+
+
 from pyspark import SparkContext
 
 sc = SparkContext(master='local[*]',appName='MyPySparkScript')
@@ -13,7 +16,3 @@ for i in lista:
 	
 	index = lista.index(i)
 	counts.saveAsTextFile(lnewFiles[index])
-
-#rdd = sc.parallelize([1,2,3,4,5])
-
-#print("result: "+str(rdd.count())
