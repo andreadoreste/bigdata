@@ -1,18 +1,23 @@
-
-
-
 from pyspark import SparkContext
 
 sc = SparkContext(master='local[*]',appName='MyPySparkScript')
-lista = ['house-of-cards.txt','master-of-none.txt','orange-is-the-new-black.txt','sense8.txt','soue.txt','stranger-things.txt']
-lnewFiles = ['mRhouse-of-cards','mRmaster-of-none','mRorange-is-the-new-black','mRsense8','mRsoue','mRstranger-things']
 
-for i in lista:
+#Receber a lista com hashtags
+urls = [ 'narcos', 'daredevil']
+lnewFiles = ["mR"+url for url  in urls]
 
-	text_file = sc.textFile(i)
+#Inicia varios processos para buscar os tweets
+data = sc.parallelize(urls)
+sc.addPyFile("examples\src\main\python\scrape_hashtags.py")
+import scrape_hashtags
+rdd = data.map(lambda x: (x, scrape_hashtags.ImportTweets(x))).collect()
+
+#wordcount para cada serie
+for i in urls:
+	text_file = sc.textFile(i+".txt")
 	counts = text_file.flatMap(lambda line: line.split(" ")) \
 				.map(lambda word: (word, 1)) \
 				.reduceByKey(lambda a, b: a + b)
 	
-	index = lista.index(i)
+	index = urls.index(i)
 	counts.saveAsTextFile(lnewFiles[index])
