@@ -1,8 +1,6 @@
 import tweepy
 from tweepy import OAuthHandler
 import urllib2
-import mysql.connector
-from mysql.connector import Error
 from bs4 import BeautifulSoup
 import requests
 import datetime
@@ -11,7 +9,6 @@ import time
 import sys
 import os
 
-import config
 import argparse
 import string
 import json
@@ -22,6 +19,10 @@ from selenium.webdriver.common.keys import Keys
 
 import pickle
 
+consumer_key = 'Gi0rd6bUNcv1GQ2zYJo3XbVC7'
+consumer_secret = '3MP591bAfpyF966UDnqrr8wGGMtbxRdKOBd5e8JyAVPjr9YTfb'
+access_token = '747983536293052416-uWsP9BxOzPNaSzhpxkBFn3diU7qeW1I'
+access_secret = 'AIjtrqCvZLoko6b9oCjUMrUrFF0w9LSdplO19aGMhfnuY'
 
 firefox_profile = webdriver.FirefoxProfile()
 firefox_profile.set_preference('permissions.default.stylesheet', 2)
@@ -29,9 +30,9 @@ firefox_profile.set_preference('permissions.default.image', 2)
 firefox_profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
 # create driver
 driver = webdriver.Firefox(firefox_profile=firefox_profile)
+base_url = "https://twitter.com/search?l=en&q=%23{}&src=typd"
 
 class Tweet:
-	
 	def __init__(self, id, text, name):
 		self.id = id
 		self.text = text
@@ -71,14 +72,17 @@ def extract_tweet_ids(soup):
 			ListaTweets.append(tweet_id)
 	return ListaTweets
 
-def save_tweets(url, n, group):
+def save_tweets(nomeSerie, n, group):
+	url = base_url.format(nomeSerie)
 	auth = Authenticate()
 	api = tweepy.API(auth)
 	tweets = []
 	# crawl page
-	soup = crawl_page(url["url"], n)
+	soup = crawl_page(url, n)
 	# get tweet tags
 	tweetsIds = extract_tweet_ids(soup)
+	file = open(nomeSerie + ".json", "w+")
+        file.close()
 	print('>> Grabbed {0} tweets for {1}'.format(len(tweetsIds), url))
 	for i in range(0, len(tweetsIds), 100):
 		tweets = []
@@ -90,15 +94,13 @@ def save_tweets(url, n, group):
 			print(e)
 
 		for tweet in tweets:
-		file = open(url["nome"] + ".json", "w+")
+		file = open(nomeSerie + ".json", "a+")
 		file.write(json.dumps(tweet._json) + "\n")
 		file.close()
 		
 
-if __name__ == '__main__':
-	urls = [{'nome': 'narcos', 'url': 'https://twitter.com/search?l=en&q=%23narcos&src=typd&lang=en'}, {'nome': 'master of none', 'url': 'https://twitter.com/search?l=en&q=master%20of%20none&src=typd&lang=en'},{'nome': 'house of cards', 'url': 'https://twitter.com/search?l=en&q=house%20of%20cards%20netflix&src=typd&lang=en'},{'nome': 'orange is the new black', 'url': 'https://twitter.com/search?l=en&q=orange%20is%20the%20new%20black%20netflix&src=typd&lang=en'},{'nome': 'stranger things', 'url': 'https://twitter.com/search?l=en&q=stranger%20things%20netflix&src=typd&lang=en'},{'nome': 'sense8', 'url': 'https://twitter.com/search?l=en&q=%23sense8&src=typd&lang=en' },{'nome': '13 reasons why', 'url': 'https://twitter.com/search?l=en&q=13%20reasons%20why&src=typd&lang=en'},{'nome': 'soue', 'url': 'https://twitter.com/search?l=en&q=series%20of%20unfortunate%20events%20netflix&src=typd&lang=en' },{'nome': 'daredevil', 'url': 'https://twitter.com/search?l=en&q=daredevil%20netflix&src=typd&lang=en'},{'nome': 'black mirror', 'url': 'https://twitter.com/search?l=en&q=black%20mirror%20netflix&src=typd&lang=en'}]
-	for url in urls:
-		save_tweets(url,n=400, group='set3')
-	driver.quit()
+def ImportTweets(nomeSerie):
+    save_tweets(nomeSerie,n=10, group='set3')
+    driver.quit()
 
 
