@@ -21,12 +21,7 @@ consumer_key = 'Gi0rd6bUNcv1GQ2zYJo3XbVC7'
 consumer_secret = '3MP591bAfpyF966UDnqrr8wGGMtbxRdKOBd5e8JyAVPjr9YTfb'
 access_token = '747983536293052416-uWsP9BxOzPNaSzhpxkBFn3diU7qeW1I'
 access_secret = 'AIjtrqCvZLoko6b9oCjUMrUrFF0w9LSdplO19aGMhfnuY'
-firefox_profile = webdriver.FirefoxProfile()
-firefox_profile.set_preference('permissions.default.stylesheet', 2)
-firefox_profile.set_preference('permissions.default.image', 2)
-firefox_profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
-# create driver
-driver = webdriver.Firefox(firefox_profile=firefox_profile)
+
 base_url = "https://twitter.com/search?l=en&q=%23{}&src=typd"
 
 class Tweet:
@@ -40,7 +35,7 @@ def Authenticate():
     auth.set_access_token(access_token, access_secret)
     return auth        
 
-def crawl_page(url, n):
+def crawl_page(url, n, driver):
     driver.get(url)
     driver.implicitly_wait(15)
     for i in range(n):
@@ -61,12 +56,12 @@ def extract_tweet_ids(soup):
             ListaTweets.append(tweet_id)
     return ListaTweets
 
-def save_tweets(nomeSerie, n, group):
+def save_tweets(nomeSerie, driver, n, group):
     url = base_url.format(nomeSerie)
     auth = Authenticate()
     api = tweepy.API(auth)
     tweets = []
-    soup = crawl_page(url, n)
+    soup = crawl_page(url, n, driver)
     tweetsIds = extract_tweet_ids(soup)
     file = open(nomeSerie + ".json", "w+")
     file.close()
@@ -87,7 +82,13 @@ def save_tweets(nomeSerie, n, group):
         
 
 def ImportTweets(nomeSerie):
-    save_tweets(nomeSerie,n=10, group='set3')
+    firefox_profile = webdriver.FirefoxProfile()
+    firefox_profile.set_preference('permissions.default.stylesheet', 2)
+    firefox_profile.set_preference('permissions.default.image', 2)
+    firefox_profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+    # create driver
+    driver = webdriver.Firefox(firefox_profile=firefox_profile)
+    save_tweets(nomeSerie, driver,n=10, group='set3')
     driver.quit()
 
 

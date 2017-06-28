@@ -10,12 +10,12 @@ def BuscaParalelaSpark(listaSerie, sc):
 def wordCount(listaSerie, sc):
     lnewFiles = ["mR"+nome for nome in listaSerie]
     for i in listaSerie:
-		text_file = sc.textFile(i+".txt")
-		counts = text_file.flatMap(lambda line: line.split(" ")) \
-					.map(lambda word: (word, 1)) \
-					.reduceByKey(lambda a, b: a + b)
-		
-		index = listaSerie.index(i)
-		counts.saveAsTextFile(lnewFiles[index])
+        text_file = sc.textFile(i+".txt")
+        counts = text_file.flatMap(lambda line: line.split(" ")) \
+                    .map(lambda word: (word, 1)) \
+                    .reduceByKey(lambda a, b: a + b)
+        
+        index = listaSerie.index(i)
+        counts.saveAsTextFile(lnewFiles[index])
 
     

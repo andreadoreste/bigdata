@@ -90,7 +90,7 @@ class window_research:
 
         #Botão Pesquisar
         self.search = Button(root, text="GO!")
-        self.search.bind("<Button-1>",self.aff) 
+        self.search.bind("<Button-1>",self.pesquisar) 
         #p = self.search
         #p.grid(row=12)
         self.search.grid(row=12)
@@ -123,7 +123,7 @@ class window_research:
         t.grid(row=r, column=1)
 
         #self.value = 
-    def aff(self,event):
+    def pesquisar(self,event):
         words = []
         self.texts = [self.text_1, self.text_2, self.text_3,self.text_4,self.text_5,self.text_6,self.text_7,self.text_8,self.text_9,self.text_10]
 
@@ -131,21 +131,32 @@ class window_research:
             if (i.get()):
                  words.append(i.get())
 
-        self.bla(words)
+        self.ranquear(words)
         
     
-    def bla(self, listaSerie):
-        # spark_wordcount.BuscaParalelaSpark(listaSerie, self.sc)
-        # listaJson = [serie+".json" for serie in listaSerie]
-        # json_to_txt.json_to_txt(listaJson)
-        # spark_wordcount.wordCount(listaSerie, self.sc)
+    def ranquear(self, listaSerie):
+        spark_wordcount.BuscaParalelaSpark(listaSerie, self.sc)
+        listajson = [serie+".json" for serie in listaSerie]
+        json_to_txt.json_to_txt(listajson)
+        spark_wordcount.wordCount(listaSerie, self.sc)
         for serie in listaSerie:
             unicode_to_text.unicode_to_txt(serie+".txt")
-        # data = self.sc.parallelize(listaSerie)
-        # self.sc.addPyFile("examples\src\main\python\Sentiment_Analysis.py")   
-        # rdd = data.map(lambda x: (x, Sentiment_Analysis.analiseCompleta(x))).collect()
-        Sentiment_Analysis.analiseCompleta(listaSerie[0])
-
+        data = self.sc.parallelize(listaSerie)
+        self.sc.addPyFile("examples\src\main\python\Sentiment_Analysis.py")   
+        rdd = data.map(lambda x: (x, Sentiment_Analysis.analiseCompleta(x))).collect()
+        rank = Sentiment_Analysis.rank()
+        resultado = ""
+        for par in rank:
+            resultado = resultado + par[1] + ":" + str(par[0]) + "\n"
+        window_display_results(self.root, resultado)
+            
+class window_display_results:
+    def __init__(self,root,text):
+        #text = 'bla \n bla \n bla'
+        T = Text(root,font = ("Times New Roman",20),height=10,width=20)
+        T.pack()
+        T.insert(END, text)
+        
 teste = Tk()
 new_window = window_research(teste)
 print new_window
